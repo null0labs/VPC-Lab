@@ -1,0 +1,58 @@
+hostname TOR-SW2
+vdc TOR-SW2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature lacp
+
+no password strength-check
+username admin password admin role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin network-admin auth md5 32280EAC19D2E2BEEF21376826E4D7D836
+E3 priv aes-128 53003E88FE6C011A53DDF3FFA3360717E36C localizedV2key
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1,20
+
+vrf context management
+
+interface port-channel1
+  description Uplink to Core (vPC)
+  switchport
+  switchport mode trunk
+  spanning-tree port type edge trunk
+
+interface Ethernet1/1
+  description Uplink to Core Switch
+  switchport
+  switchport mode trunk
+  channel-group 1 mode active
+
+interface Ethernet1/2
+  description Uplink to Core Switch
+  switchport
+  switchport mode trunk
+  channel-group 1 mode active
+
+interface Ethernet1/3
+  description Server-Host
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+
+interface mgmt0
+  vrf member management
+icam monitor scale
+
+cli alias name wr copy run start
+line console
+line vty
+boot nxos bootflash:/nxos64-cs.10.5.2.F.bin
