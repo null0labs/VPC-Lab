@@ -1,0 +1,116 @@
+hostname CORE-SW2
+vdc CORE-SW2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+cfs eth distribute
+feature lacp
+feature vpc
+
+no password strength-check
+username admin password admin role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin network-admin auth md5 3319FA3E806042683729B9F2F2BC6DABA8
+8F priv aes-128 167FD619D875486C581A82E6F5FB36ADFDDF localizedV2key
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1,20
+
+spanning-tree vlan 1,20 priority 4096
+vrf context management
+vpc domain 100
+  peer-switch
+  role priority 100
+  system-priority 8192
+  peer-keepalive destination 10.1.1.1 source 10.1.1.2
+  peer-gateway
+  auto-recovery
+  ip arp synchronize
+
+
+interface port-channel10
+  description Uplink to Access Switch
+  switchport mode trunk
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  vpc 10
+
+interface port-channel20
+  description Uplink to Access Switch
+  switchport mode trunk
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  vpc 20
+
+interface port-channel30
+  description Uplink to Access Switch
+  switchport mode trunk
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  vpc 30
+
+interface port-channel40
+  description Uplink to Access Switch
+  switchport mode trunk
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  vpc 40
+
+interface port-channel1000
+  description vPC Peer-Link
+  switchport mode trunk
+  spanning-tree port type network
+  vpc peer-link
+
+interface Ethernet1/1
+  description Uplink to Access Switch - Member Link
+  switchport mode trunk
+  channel-group 10 mode active
+
+interface Ethernet1/2
+  description Uplink to Access Switch - Member Link
+  switchport mode trunk
+  channel-group 20 mode active
+
+interface Ethernet1/3
+  description Uplink to Access Switch - Member Link
+  switchport mode trunk
+  channel-group 30 mode active
+
+interface Ethernet1/4
+  description Uplink to Access Switch - Member Link
+  switchport mode trunk
+  channel-group 40 mode active
+
+interface Ethernet1/5
+  description Shutdown
+  shutdown
+
+interface Ethernet1/6
+  description vPC Peer-Link Member
+  switchport mode trunk
+  channel-group 1000 mode active
+
+interface Ethernet1/7
+  description vPC Peer-Link Member
+  switchport mode trunk
+  channel-group 1000 mode active
+
+interface mgmt0
+  description Keepalive
+  vrf member management
+  ip address 10.1.1.2/30
+icam monitor scale
+
+cli alias name wr copy run start
+line console
+line vty
+boot nxos bootflash:/nxos64-cs.10.5.2.F.bin
